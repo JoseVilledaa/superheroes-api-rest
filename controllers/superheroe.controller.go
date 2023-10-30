@@ -54,8 +54,22 @@ func (sc *SuperheroeController) CreateSuperheroe(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Superheroe created successfully"})
 }
 
+func (sc *SuperheroeController) DeleteSuperheroe(ctx *gin.Context) {
+	id, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	if err := sc.superheroeService.DeleteSuperheroe(id); err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"message": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Superheroe deleted successfully"})
+}
+
 func (sc *SuperheroeController) RegisterRoutes(rg *gin.RouterGroup) {
 	route := rg.Group("/superheroes")
 	route.GET("/getall", sc.GetAll)
 	route.POST("/create", sc.CreateSuperheroe)
+	route.DELETE("/delete/:id", sc.DeleteSuperheroe)
 }
