@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	"github.com/JoseVilledaa/superheroes-api/models"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -14,7 +16,7 @@ type SuperheroeServiceImpl struct {
 	ctx                  context.Context
 }
 
-func NewSuperheroeService(superheroecollection *mongo.Collection, ctx context.Context) SuperheroeService {
+func NewSuperheroeService(superheroecollection *mongo.Collection, ctx context.Context) *SuperheroeServiceImpl {
 	return &SuperheroeServiceImpl{
 		superheroecollection: superheroecollection,
 		ctx:                  ctx,
@@ -43,4 +45,21 @@ func (s *SuperheroeServiceImpl) GetAll() ([]models.Superheroe, error) {
 		return nil, errors.New("no superheroes yet :c")
 	}
 	return superheroe, nil
+}
+
+func (s *SuperheroeServiceImpl) CreateSuperheroe(sh *models.Superheroe) error {
+	_, err := s.superheroecollection.InsertOne(s.ctx, sh)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *SuperheroeServiceImpl) DeleteSuperheroe(id uuid.UUID) error {
+	filter := bson.D{primitive.E{Key: "id", Value: id}}
+	result, _ := s.superheroecollection.DeleteOne(s.ctx, filter)
+	if result.DeletedCount != 1 {
+		return errors.New("superheroe not found")
+	}
+	return nil
 }
