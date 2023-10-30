@@ -14,7 +14,15 @@ type SuperheroeServiceImpl struct {
 	ctx                  context.Context
 }
 
-func NewSuperheroeService(superheroecollection *mongo.Collection, ctx context.Context) SuperheroeService {
+func (s *SuperheroeServiceImpl) CreateSuperheroe(sh *models.Superheroe) error {
+	_, err := s.superheroecollection.InsertOne(s.ctx, sh)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewSuperheroeService(superheroecollection *mongo.Collection, ctx context.Context) *SuperheroeServiceImpl {
 	return &SuperheroeServiceImpl{
 		superheroecollection: superheroecollection,
 		ctx:                  ctx,
